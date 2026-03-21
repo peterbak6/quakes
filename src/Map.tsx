@@ -138,15 +138,6 @@ export default function MapView({
       stroked: true,
       filled: true,
       pickable: true,
-      // Fix alpha accumulation: use 'one' for alpha src so canvas alpha
-      // compounds toward 1.0 at dense clusters instead of converging at ~17%
-      parameters: {
-        blend: true,
-        blendColorSrcFactor: "src-alpha",
-        blendColorDstFactor: "one-minus-src-alpha",
-        blendAlphaSrcFactor: "one",
-        blendAlphaDstFactor: "one-minus-src-alpha",
-      },
     }),
 
     // Transparent fill — drag to move the whole rect

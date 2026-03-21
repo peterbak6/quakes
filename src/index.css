@@ -48,18 +48,17 @@ html, body, #root {
   left: 16px;
   z-index: 10;
   background: #ffffffaa;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  border-radius: 14px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
-  padding: 12px 16px 10px;
+  border: 1px solid rgba(0, 0, 0, 0.13);
+  border-radius: 10px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.13);
+  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  min-width: 260px;
-  max-width: min(360px, calc(100vw - 32px));
+  width: 300px;
+  max-width: calc(100vw - 32px);
   max-height: calc(100vh - 32px);
   overflow-y: auto;
-  color: #444;
+  color: #1a1a1a;
   user-select: none;
 }
 
@@ -165,26 +164,57 @@ html, body, #root {
   background: rgba(255, 255, 255, 0.18);
 }
 
+/* ── Legend collapse toggle ── */
+.legend-collapse-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  background: rgba(0,0,0,0.03);
+  border: none;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 4px 0;
+  cursor: pointer;
+  color: #999;
+  font-size: 10px;
+  font-family: inherit;
+  transition: background 0.12s;
+}
+.legend-collapse-btn:hover {
+  background: rgba(0, 0, 0, 0.07);
+  color: #555;
+}
+.legend-collapse-label {
+  line-height: 1;
+}
+
 /* ── Panel sections ── */
 .panel-divider {
   height: 1px;
   background: rgba(0, 0, 0, 0.1);
-  margin: 2px 0;
+  margin: 0;
+}
+.panel-section {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 .legend-section-title {
-  font-size: var(--fs-section);
-  font-weight: 300;
+  font-size: var(--fs-body);
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  opacity: 0.7;
-  margin-bottom: 2px;
+  letter-spacing: 0.08em;
+  color: #1a1a1a;
+  opacity: 0.85;
 }
 .legend-desc {
   font-size: var(--fs-body);
   font-weight: 400;
-  line-height: 1.4;
-  opacity: 0.5;
-  margin-top: 2px;
+  line-height: 1.55;
+  color: #444;
+  opacity: 1;
 }
 
 /* ── Size legend SVG ── */
@@ -197,25 +227,37 @@ html, body, #root {
 /* ── Panel header / title ── */
 .panel-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 2px;
+  gap: 12px;
+  padding: 14px 16px 0;
+}
+.panel-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
 }
 .panel-title {
   font-size: var(--fs-section);
-  font-weight: 300;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  opacity: 0.9;
+  letter-spacing: 0.08em;
+  color: #1a1a1a;
   line-height: 1.1;
 }
 
 /* ── Data source footer ── */
+.panel-footer {
+  padding: 10px 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
 .data-source-link {
   font-size: var(--fs-overlay);
   font-weight: 400;
-  opacity: 0.35;
+  opacity: 0.4;
   color: inherit;
   text-decoration: none;
   text-align: center;
@@ -231,6 +273,7 @@ html, body, #root {
   display: flex;
   align-items: center;
   gap: 8px;
+  padding: 0 16px;
 }
 .nav-label {
   font-size: var(--fs-body);
@@ -266,6 +309,7 @@ html, body, #root {
   font-size: var(--fs-body);
   opacity: 0.6;
   text-align: center;
+  padding: 0 16px;
 }
 .nav-error {
   color: #ff6b6b;
@@ -275,20 +319,21 @@ html, body, #root {
 /* ── Fetch button ── */
 .fetch-btn {
   width: 100%;
-  padding: 7px 0;
-  background: rgba(252, 78, 42, 0.75);
-  border: 1px solid rgba(252, 78, 42, 0.9);
+  padding: 9px 0;
+  background: rgba(220, 50, 20, 0.82);
+  border: none;
   color: #fff;
-  border-radius: 8px;
+  border-radius: 0;
   cursor: pointer;
   font-size: var(--fs-body);
   font-family: inherit;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   transition: background 0.15s;
 }
 .fetch-btn:hover:not(:disabled) {
-  background: rgba(252, 78, 42, 1);
+  background: rgba(220, 50, 20, 1);
 }
 .fetch-btn:disabled {
   opacity: 0.45;
