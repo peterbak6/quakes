@@ -1,11 +1,11 @@
 import { useRef, useState } from "react";
 import DeckGL from "@deck.gl/react";
 import { Map as MapLibre } from "@vis.gl/react-maplibre";
-import { ScatterplotLayer, PathLayer, PolygonLayer } from "@deck.gl/layers";
+import { ScatterplotLayer, PolygonLayer } from "@deck.gl/layers";
 import { PathStyleExtension } from "@deck.gl/extensions";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { Quake } from "./hooks/useEarthquakes";
-import { getPixelRadius } from "./util";
+import { getFeltRadiusMeters } from "./util";
 
 const INITIAL_VIEW = {
   longitude: 35.0,
@@ -40,8 +40,8 @@ interface Handle {
 interface MapProps {
   quakes: Quake[];
   bbox: BBox;
-  sizeFactor: number;
   onBboxChange: (bbox: BBox) => void;
+  onViewStateChange: (zoom: number, lat: number) => void;
 }
 
 function applyDrag(drag: DragState, coord: [number, number]): BBox {
@@ -70,8 +70,8 @@ function applyDrag(drag: DragState, coord: [number, number]): BBox {
 export default function MapView({
   quakes,
   bbox,
-  sizeFactor,
   onBboxChange,
+  onViewStateChange,
 }: MapProps) {
   const dragRef = useRef<DragState | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -120,6 +120,35 @@ export default function MapView({
   ];
 
   const layers = [
+    // Earthquake circles — sorted largest-first so small circles render on top
+    new ScatterplotLayer<Quake>({
+      id: "quakes",
+      data: [...quakes].sort((a, b) => b.magnitude - a.magnitude),
+      getPosition: (d) =>
+        [d.coords[0], d.coords[1], 100 - d.magnitude * 10] as [
+          number,
+          number,
+          number,
+        ],
+      getRadius: (d) => getFeltRadiusMeters(d.magnitude),
+      radiusUnits: "meters",
+      getFillColor: [220, 50, 20, 44],
+      getLineColor: [200, 40, 10, 100],
+      lineWidthMinPixels: 1,
+      stroked: true,
+      filled: true,
+      pickable: true,
+      // Fix alpha accumulation: use 'one' for alpha src so canvas alpha
+      // compounds toward 1.0 at dense clusters instead of converging at ~17%
+      parameters: {
+        blend: true,
+        blendColorSrcFactor: "src-alpha",
+        blendColorDstFactor: "one-minus-src-alpha",
+        blendAlphaSrcFactor: "one",
+        blendAlphaDstFactor: "one-minus-src-alpha",
+      },
+    }),
+
     // Transparent fill — drag to move the whole rect
     new PolygonLayer({
       id: "bbox-fill",
@@ -157,21 +186,6 @@ export default function MapView({
       onDrag: duringDrag,
       onDragEnd: endDrag,
     }),
-
-    // Earthquake circles
-    new ScatterplotLayer<Quake>({
-      id: "quakes",
-      data: quakes,
-      getPosition: (d) => d.coords,
-      getRadius: (d) => getPixelRadius(d.magnitude, sizeFactor),
-      updateTriggers: { getRadius: sizeFactor },
-      radiusUnits: "pixels",
-      getFillColor: [220, 50, 20, 128],
-      getLineColor: [220, 50, 20, 255],
-      lineWidthMinPixels: 0.5,
-      stroked: true,
-      pickable: true,
-    }),
   ];
 
   return (
@@ -180,6 +194,10 @@ export default function MapView({
       controller={isDragging ? { dragPan: false } : true}
       layers={layers}
       style={{ position: "absolute", inset: "0" }}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      onViewStateChange={({ viewState }: any) =>
+        onViewStateChange(viewState.zoom, viewState.latitude)
+      }
       getCursor={({ isHovering }) =>
         isDragging ? "grabbing" : isHovering ? "grab" : "default"
       }

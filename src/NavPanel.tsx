@@ -1,10 +1,18 @@
 import { useState } from "react";
 import type { QuakeParams } from "./hooks/useEarthquakes";
-import { getPixelRadius } from "./util";
+import { getFeltRadiusMeters } from "./util";
 
 const SCALE_MAGS = [3, 4, 5, 6, 7, 8, 9];
-const BAR_W = 220; // SVG units for the full bar
-const X0 = 4; // left start of bar
+const BAR_W = 220;
+const X0 = 4;
+
+// Web Mercator: metres per pixel at a given zoom and latitude
+function metersToPixels(meters: number, zoom: number, lat: number): number {
+  const mpp =
+    (40075016.686 * Math.cos((lat * Math.PI) / 180)) /
+    (256 * Math.pow(2, zoom));
+  return meters / mpp;
+}
 
 interface NavPanelProps {
   params: QuakeParams;
@@ -13,8 +21,8 @@ interface NavPanelProps {
   loading: boolean;
   count: number;
   error: string | null;
-  sizeFactor: number;
-  onSizeFactorChange: (f: number) => void;
+  zoom: number;
+  centerLat: number;
 }
 
 export default function NavPanel({
@@ -24,8 +32,8 @@ export default function NavPanel({
   loading,
   count,
   error,
-  sizeFactor,
-  onSizeFactorChange,
+  zoom,
+  centerLat,
 }: NavPanelProps) {
   const [settingsOpen, setSettingsOpen] = useState(false);
 
@@ -145,28 +153,14 @@ export default function NavPanel({
         USGS Earthquake Catalog
       </a>
 
-      {/* ── Section 2: display ── */}
+      {/* ── Section 2: scale legend ── */}
       <div className="panel-divider" style={{ marginTop: 4 }} />
 
-      <div className="nav-row">
-        <span className="nav-label">Size factor</span>
-        <input
-          type="range"
-          className="date-range"
-          min="0"
-          max="2"
-          step="0.1"
-          value={sizeFactor}
-          onChange={(e) => onSizeFactorChange(Number(e.target.value))}
-        />
-        <span className="nav-value">{sizeFactor.toFixed(1)}×</span>
-      </div>
-
-      {/* Scale-line legend */}
+      {/* Scale-line legend: ticks at getFeltRadiusMeters(m) converted to pixels at current zoom */}
       {(() => {
         const ticks = SCALE_MAGS.map((m) => ({
           m,
-          x: X0 + getPixelRadius(m, sizeFactor),
+          x: X0 + metersToPixels(getFeltRadiusMeters(m), zoom, centerLat),
         })).filter((t) => t.x <= X0 + BAR_W);
         return (
           <svg

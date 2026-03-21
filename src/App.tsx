@@ -16,7 +16,8 @@ const DEFAULT_PARAMS: QuakeParams = {
 export default function App() {
   const [draft, setDraft] = useState<QuakeParams>(DEFAULT_PARAMS);
   const [committed, setCommitted] = useState<QuakeParams>(DEFAULT_PARAMS);
-  const [sizeFactor, setSizeFactor] = useState(1);
+  const [zoom, setZoom] = useState(6.5);
+  const [centerLat, setCenterLat] = useState(31.5);
   const { quakes, loading, error, count } = useEarthquakes(committed);
 
   const bbox = {
@@ -31,7 +32,6 @@ export default function App() {
       <MapView
         quakes={quakes}
         bbox={bbox}
-        sizeFactor={sizeFactor}
         onBboxChange={(newBbox) =>
           setDraft((d) => ({
             ...d,
@@ -41,6 +41,10 @@ export default function App() {
             maxlongitude: newBbox.maxLon,
           }))
         }
+        onViewStateChange={(z, lat) => {
+          setZoom(z);
+          setCenterLat(lat);
+        }}
       />
       <NavPanel
         params={draft}
@@ -49,8 +53,8 @@ export default function App() {
         loading={loading}
         count={count}
         error={error}
-        sizeFactor={sizeFactor}
-        onSizeFactorChange={setSizeFactor}
+        zoom={zoom}
+        centerLat={centerLat}
       />
     </div>
   );
