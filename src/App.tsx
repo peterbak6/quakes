@@ -28,7 +28,20 @@ export default function App() {
 
   return (
     <div className="app">
-      <MapView quakes={quakes} bbox={bbox} sizeFactor={sizeFactor} />
+      <MapView
+        quakes={quakes}
+        bbox={bbox}
+        sizeFactor={sizeFactor}
+        onBboxChange={(newBbox) =>
+          setDraft((d) => ({
+            ...d,
+            minlatitude: newBbox.minLat,
+            maxlatitude: newBbox.maxLat,
+            minlongitude: newBbox.minLon,
+            maxlongitude: newBbox.maxLon,
+          }))
+        }
+      />
       <NavPanel
         params={draft}
         onChange={setDraft}

@@ -20,17 +20,20 @@ export function getRadius(mag: number, factor: number = 0.002): number {
  * @returns A number representing the pixel radius for the legend circle.
  */
 export function getPixelRadius(mag: number, factor: number = 2.5): number {
-  // 1. Calculate a "Relative Energy" factor
-  // 1.5 is the seismic moment constant.
-  // We subtract a baseline (like 2.0) to keep the numbers smaller.
   const energyFactor = Math.pow(10, 1.5 * (mag - 2.0));
-
-  // 2. Take the Square Root so the AREA represents the energy
   const baseRadius = Math.sqrt(energyFactor);
-
-  // 3. Apply a multiplier and a "Min Size" floor
-  // Multiplier (2.5) adjusts the spread; 5 is the smallest dot size.
   const finalRadius = (baseRadius * factor) / 10 + 2;
-
   return finalRadius;
+}
+
+/**
+ * Converts earthquake magnitude to an estimated felt radius in meters, based on the formula: 10^((0.5 * Mag) - 0.5). The resulting radius is then converted from kilometers to meters.
+ * @param mag - The earthquake magnitude.
+ * @returns The estimated felt radius in meters.
+ */
+export function getFeltRadiusMeters(mag: number): number {
+  // Formula: 10^((0.5 * Mag) - 0.5)
+  // We convert the resulting km to meters by multiplying by 1000
+  const radiusKm = Math.pow(10, 0.5 * mag - 0.5);
+  return radiusKm * 1000;
 }
