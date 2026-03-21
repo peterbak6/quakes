@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Earthquake Browser</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <h1>🌍 Earthquake Browser</h1>
+    <p class="subtitle">Data from <a href="https://earthquake.usgs.gov" target="_blank" rel="noopener">USGS Earthquake Hazards Program</a></p>
+  </header>
+
+  <main>
+    <section class="controls">
+      <div class="control-group">
+        <label for="feed-select">Time range &amp; magnitude:</label>
+        <select id="feed-select">
+          <optgroup label="Past Hour">
+            <option value="significant_hour">Significant — past hour</option>
+            <option value="4.5_hour">M4.5+ — past hour</option>
+            <option value="2.5_hour">M2.5+ — past hour</option>
+            <option value="1.0_hour">M1.0+ — past hour</option>
+            <option value="all_hour">All — past hour</option>
+          </optgroup>
+          <optgroup label="Past Day">
+            <option value="significant_day">Significant — past day</option>
+            <option value="4.5_day">M4.5+ — past day</option>
+            <option value="2.5_day" selected>M2.5+ — past day</option>
+            <option value="1.0_day">M1.0+ — past day</option>
+            <option value="all_day">All — past day</option>
+          </optgroup>
+          <optgroup label="Past 7 Days">
+            <option value="significant_week">Significant — past 7 days</option>
+            <option value="4.5_week">M4.5+ — past 7 days</option>
+            <option value="2.5_week">M2.5+ — past 7 days</option>
+            <option value="1.0_week">M1.0+ — past 7 days</option>
+            <option value="all_week">All — past 7 days</option>
+          </optgroup>
+          <optgroup label="Past 30 Days">
+            <option value="significant_month">Significant — past 30 days</option>
+            <option value="4.5_month">M4.5+ — past 30 days</option>
+            <option value="2.5_month">M2.5+ — past 30 days</option>
+            <option value="1.0_month">M1.0+ — past 30 days</option>
+            <option value="all_month">All — past 30 days</option>
+          </optgroup>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label for="sort-select">Sort by:</label>
+        <select id="sort-select">
+          <option value="time">Time (newest first)</option>
+          <option value="magnitude">Magnitude (largest first)</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label for="search-input">Filter by place:</label>
+        <input type="text" id="search-input" placeholder="e.g. California, Japan…" />
+      </div>
+
+      <button id="refresh-btn">🔄 Refresh</button>
+    </section>
+
+    <section id="summary" class="summary" hidden></section>
+
+    <div id="status" class="status" hidden></div>
+
+    <section id="quake-list" class="quake-list" aria-live="polite"></section>
+  </main>
+
+  <footer>
+    <p>Source: <a href="https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php" target="_blank" rel="noopener">USGS GeoJSON Summary Feed</a> — updated every 1–5 minutes</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
