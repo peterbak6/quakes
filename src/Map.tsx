@@ -1,11 +1,12 @@
 import { useRef, useState } from "react";
 import DeckGL from "@deck.gl/react";
 import { Map as MapLibre } from "@vis.gl/react-maplibre";
-import { ScatterplotLayer, PolygonLayer } from "@deck.gl/layers";
+import { ScatterplotLayer, PolygonLayer, PathLayer } from "@deck.gl/layers";
 import { PathStyleExtension } from "@deck.gl/extensions";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { Quake } from "./hooks/useEarthquakes";
-import { getFeltRadiusMeters } from "./util";
+import { earthquakePixelRadius, getFeltRadiusKM, sigToColor } from "./util";
+import type { RadiusParams } from "./util";
 
 const INITIAL_VIEW = {
   longitude: 35.0,
@@ -40,8 +41,26 @@ interface Handle {
 interface MapProps {
   quakes: Quake[];
   bbox: BBox;
+  radiusParams: RadiusParams;
   onBboxChange: (bbox: BBox) => void;
   onViewStateChange: (zoom: number, lat: number) => void;
+}
+
+// Approximate a geographic circle as a closed path (lon/lat coords)
+function circleRingCoords(
+  lon: number,
+  lat: number,
+  radiusM: number,
+  nSeg = 80,
+): [number, number][] {
+  const latDeg = radiusM / 111320;
+  const lonDeg = radiusM / (111320 * Math.cos((lat * Math.PI) / 180));
+  const coords: [number, number][] = [];
+  for (let i = 0; i <= nSeg; i++) {
+    const a = (2 * Math.PI * i) / nSeg;
+    coords.push([lon + Math.cos(a) * lonDeg, lat + Math.sin(a) * latDeg]);
+  }
+  return coords;
 }
 
 function applyDrag(drag: DragState, coord: [number, number]): BBox {
@@ -70,11 +89,13 @@ function applyDrag(drag: DragState, coord: [number, number]): BBox {
 export default function MapView({
   quakes,
   bbox,
+  radiusParams,
   onBboxChange,
   onViewStateChange,
 }: MapProps) {
   const dragRef = useRef<DragState | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [hoveredQuake, setHoveredQuake] = useState<Quake | null>(null);
 
   const midLon = (bbox.minLon + bbox.maxLon) / 2;
   const midLat = (bbox.minLat + bbox.maxLat) / 2;
@@ -130,15 +151,51 @@ export default function MapView({
           number,
           number,
         ],
-      getRadius: (d) => getFeltRadiusMeters(d.magnitude),
-      radiusUnits: "meters",
-      getFillColor: [220, 50, 20, 44],
-      getLineColor: [200, 40, 10, 100],
+      getRadius: (d) =>
+        earthquakePixelRadius(d.magnitude, d.coords[2], radiusParams),
+      radiusUnits: "pixels",
+      getFillColor: (d) => sigToColor(d.data?.sig, 160),
+      getLineColor: (d) =>
+        hoveredQuake && hoveredQuake.coords.join("|") === d.coords.join("|")
+          ? [0, 0, 0, 128]
+          : [255, 255, 255, 128],
+      updateTriggers: {
+        getRadius: [radiusParams],
+        getFillColor: [],
+        getLineColor: [hoveredQuake],
+      },
       lineWidthMinPixels: 1,
       stroked: true,
       filled: true,
       pickable: true,
+      onHover: (info) => setHoveredQuake((info.object as Quake) ?? null),
     }),
+
+    // Felt-radius dashed ring shown on hover
+    ...(hoveredQuake
+      ? [
+          new PathLayer({
+            id: "felt-radius-ring",
+            data: [
+              {
+                path: circleRingCoords(
+                  hoveredQuake.coords[0],
+                  hoveredQuake.coords[1],
+                  getFeltRadiusKM(hoveredQuake.magnitude) * 1000, // convert km to m for the radius function
+                  60,
+                ),
+              },
+            ],
+            getPath: (d) => d.path,
+            getColor: [220, 50, 20, 220],
+            getWidth: 2,
+            widthUnits: "pixels",
+            getDashArray: [3, 3],
+            dashJustified: true,
+            extensions: [new PathStyleExtension({ dash: true })],
+          }),
+        ]
+      : []),
 
     // Transparent fill — drag to move the whole rect
     new PolygonLayer({
@@ -195,9 +252,30 @@ export default function MapView({
       getTooltip={({ object }) => {
         const q = object as Quake | null;
         if (!q || !("magnitude" in q)) return null;
+        const feltKm = getFeltRadiusKM(q.magnitude);
+        const feltStr =
+          feltKm >= 100
+            ? `${Math.round(feltKm)} km`
+            : `${feltKm.toFixed(1)} km`;
         return {
-          html: `<b>${q.location}</b><br/>M ${q.magnitude.toFixed(1)} — ${q.time}`,
-          style: { fontSize: "12px" },
+          html: [
+            `<b>${q.location}</b>`,
+            `M ${q.magnitude.toFixed(1)} — ${q.time}`,
+            `Felt radius (estimated) ≈ ${feltStr}`,
+            q.data?.felt != null ? `👤 ${q.data.felt} felt reports` : null,
+            q.data?.cdi != null
+              ? `CDI ${q.data.cdi.toFixed(1)} (community intensity)`
+              : null,
+            q.data?.mmi != null
+              ? `MMI ${q.data.mmi.toFixed(1)} (modeled shaking)`
+              : null,
+            q.data?.alert
+              ? `Alert: <b style="color:${q.data.alert}">${q.data.alert}</b>`
+              : null,
+          ]
+            .filter(Boolean)
+            .join("<br/>"),
+          style: { fontSize: "12px", lineHeight: "1.6" },
         };
       }}
     >

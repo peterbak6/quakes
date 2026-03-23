@@ -273,7 +273,7 @@ html, body, #root {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 0 16px;
+  /* padding: 0 16px; */
 }
 .nav-label {
   font-size: var(--fs-body);
@@ -366,13 +366,39 @@ html, body, #root {
 /* ── Settings grid ── */
 .settings-grid {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto 1fr auto;
   gap: 5px 10px;
   align-items: center;
+}
+/* ── Per-param slider rows ── */
+.param-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.param-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.param-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.settings-label-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
 }
 .settings-label {
   font-size: var(--fs-body);
   opacity: 0.65;
+  white-space: nowrap;
+}
+.settings-desc {
+  font-size: 10px;
+  opacity: 0.4;
   white-space: nowrap;
 }
 .settings-input {

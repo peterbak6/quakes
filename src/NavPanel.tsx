@@ -1,19 +1,11 @@
 import { useState } from "react";
 import type { QuakeParams } from "./hooks/useEarthquakes";
-import { getFeltRadiusMeters } from "./util";
+import { earthquakePixelRadius } from "./util";
+import type { RadiusParams } from "./util";
 
 const SCALE_MAGS = [3, 4, 5, 6, 7, 8, 9];
 const BAR_W = 260;
 const X0 = 0;
-
-// Web Mercator: metres per pixel at a given zoom and latitude
-// deck.gl (WebMercatorViewport) and MapLibre both use 512-px tiles
-function metersToPixels(meters: number, zoom: number, lat: number): number {
-  const mpp =
-    (40075016.686 * Math.cos((lat * Math.PI) / 180)) /
-    (512 * Math.pow(2, zoom));
-  return meters / mpp;
-}
 
 interface NavPanelProps {
   params: QuakeParams;
@@ -22,8 +14,8 @@ interface NavPanelProps {
   loading: boolean;
   count: number;
   error: string | null;
-  zoom: number;
-  centerLat: number;
+  radiusParams: RadiusParams;
+  onRadiusParamsChange: (p: RadiusParams) => void;
 }
 
 export default function NavPanel({
@@ -33,9 +25,11 @@ export default function NavPanel({
   loading,
   count,
   error,
-  zoom,
-  centerLat,
+  radiusParams,
+  onRadiusParamsChange,
 }: NavPanelProps) {
+  const set = (key: keyof RadiusParams, val: number) =>
+    onRadiusParamsChange({ ...radiusParams, [key]: val });
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [legendOpen, setLegendOpen] = useState(true);
 
@@ -119,22 +113,6 @@ export default function NavPanel({
           />
         </div>
 
-        {/* <div className="nav-row">
-        <span className="nav-label">Min magnitude</span>
-        <input
-          type="range"
-          className="date-range"
-          min="0"
-          max="7"
-          step="0.5"
-          value={params.minmagnitude}
-          onChange={(e) =>
-            onChange({ ...params, minmagnitude: Number(e.target.value) })
-          }
-        />
-        <span className="nav-value">M {params.minmagnitude.toFixed(1)}</span>
-      </div> */}
-
         <button className="fetch-btn" onClick={onFetch} disabled={loading}>
           {loading ? "Loading…" : "Fetch"}
         </button>
@@ -167,18 +145,114 @@ export default function NavPanel({
         <div className="panel-section">
           <p className="legend-section-title">Estimated felt area</p>
           <p className="legend-desc">
-            The estimated felt area of each earthquake is visualized as a circle
-            whose radius is proportional to the earthquake's magnitude. The
-            scale legend below shows the size of magnitudes, which updates with
-            zoom.
+            Circle radius scales with energy and attenuates with depth.
           </p>
-          {/* Scale-line legend: ticks at getFeltRadiusMeters(m) converted to pixels at current zoom */}
+
+          <div className="param-list">
+            {(
+              [
+                [
+                  "magRef",
+                  "mag ref",
+                  "1",
+                  "8",
+                  "0.5",
+                  (v: number) => v,
+                  'where "normal" is on the magnitude scale',
+                ],
+                [
+                  "depthRef",
+                  "depth ref (km)",
+                  "0",
+                  "100",
+                  "1",
+                  (v: number) => v,
+                  'where "normal" is on the depth scale',
+                ],
+                [
+                  "d0",
+                  "d\u2080 (km)",
+                  "0",
+                  "50",
+                  "1",
+                  (v: number) => v,
+                  "how far that strength travels — surface softening",
+                ],
+                [
+                  "gamma",
+                  "\u03b3 attenuation",
+                  "0.2",
+                  "4",
+                  "0.1",
+                  (v: number) => v.toFixed(1),
+                  "how harsh reality is — higher = more depth penalty",
+                ],
+                [
+                  "rRef",
+                  "r ref (px)",
+                  "1",
+                  "60",
+                  "1",
+                  (v: number) => v,
+                  'how big "normal" looks at the reference point',
+                ],
+                [
+                  "rMin",
+                  "r min (px)",
+                  "1",
+                  "20",
+                  "1",
+                  (v: number) => v,
+                  "UI floor — smallest any circle gets",
+                ],
+                [
+                  "rMax",
+                  "r max (px)",
+                  "10",
+                  "120",
+                  "1",
+                  (v: number) => v,
+                  "UI ceiling — largest any circle gets",
+                ],
+              ] as [
+                keyof RadiusParams,
+                string,
+                string,
+                string,
+                string,
+                (v: number) => string | number,
+                string,
+              ][]
+            ).map(([key, label, min, max, step, fmt, desc]) => (
+              <div key={key} className="param-row">
+                <div className="param-header">
+                  <span className="settings-label">{label}</span>
+                  <span className="nav-value">
+                    {fmt(radiusParams[key] as number)}
+                  </span>
+                </div>
+                <span className="settings-desc">{desc}</span>
+                <input
+                  type="range"
+                  className="date-range"
+                  min={min}
+                  max={max}
+                  step={step}
+                  value={radiusParams[key] as number}
+                  onChange={(e) => set(key, Number(e.target.value))}
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* Scale-line legend: ticks at reference depth */}
           {(() => {
             const ticks = SCALE_MAGS.map((m) => ({
               m,
-              x: X0 + metersToPixels(getFeltRadiusMeters(m), zoom, centerLat),
+              x:
+                X0 +
+                earthquakePixelRadius(m, radiusParams.depthRef, radiusParams),
             })).filter((t) => t.x <= X0 + BAR_W);
-            console.log("Ticks:", ticks);
             return (
               <svg
                 className="size-legend-svg"

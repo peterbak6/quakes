@@ -14,7 +14,8 @@ export interface Quake {
   location: string;
   time: string;
   url: string;
-  coords: [number, number, number]; // [longitude, latitude, depth]
+  coords: [number, number, number];
+  data: any; // for any additional properties from the API
 }
 
 const USGS_URL = "https://earthquake.usgs.gov/fdsnws/event/1/query";
@@ -57,6 +58,7 @@ export function useEarthquakes(params: QuakeParams) {
             time: new Date(f.properties.time).toLocaleString(),
             url: f.properties.url,
             coords: f.geometry.coordinates as [number, number, number],
+            data: f.properties, // store all additional properties from the API
           })),
         );
       })
