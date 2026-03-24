@@ -164,28 +164,34 @@ html, body, #root {
   background: rgba(255, 255, 255, 0.18);
 }
 
-/* ── Legend collapse toggle ── */
-.legend-collapse-btn {
+/* ── Section accordion toggles ── */
+.section-toggle {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   width: 100%;
-  background: rgba(0,0,0,0.03);
+  background: rgba(0, 0, 0, 0.03);
   border: none;
   border-top: 1px solid rgba(0, 0, 0, 0.08);
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-  padding: 4px 0;
+  padding: 9px 16px;
   cursor: pointer;
-  color: #999;
-  font-size: 10px;
   font-family: inherit;
   transition: background 0.12s;
 }
-.legend-collapse-btn:hover {
+.section-toggle:hover {
   background: rgba(0, 0, 0, 0.07);
-  color: #555;
 }
-.legend-collapse-label {
+.section-toggle-title {
+  font-size: var(--fs-body);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #1a1a1a;
+}
+.section-toggle-icon {
+  font-size: 14px;
+  color: #888;
   line-height: 1;
 }
 
@@ -370,7 +376,31 @@ html, body, #root {
   gap: 5px 10px;
   align-items: center;
 }
-/* ── Per-param slider rows ── */
+/* ── Bounding-box compass grid ── */
+.bbox-grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  grid-template-rows: auto auto auto;
+  gap: 4px;
+  align-items: center;
+  justify-items: center;
+}
+.bbox-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+.bbox-cell .settings-input {
+  width: 82px;
+  text-align: center;
+}
+.bbox-compass {
+  font-size: 28px;
+  color: #ccc;
+  line-height: 1;
+  user-select: none;
+}
 .param-list {
   display: flex;
   flex-direction: column;

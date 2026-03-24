@@ -30,120 +30,130 @@ export default function NavPanel({
 }: NavPanelProps) {
   const set = (key: keyof RadiusParams, val: number) =>
     onRadiusParamsChange({ ...radiusParams, [key]: val });
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [legendOpen, setLegendOpen] = useState(true);
+  const [openSection, setOpenSection] = useState<
+    "earthquakes" | "impact" | null
+  >("earthquakes");
+
+  const toggle = (s: "earthquakes" | "impact") =>
+    setOpenSection((cur) => (cur === s ? null : s));
 
   return (
     <div className="slider-panel">
-      {/* ── Section 1: header ── */}
-      <div className="panel-header">
-        <div className="panel-header-text">
-          <p className="panel-title">Earthquakes</p>
+      {/* ── Section 1: EARTHQUAKES ── */}
+      <button className="section-toggle" onClick={() => toggle("earthquakes")}>
+        <span className="section-toggle-title">Earthquakes</span>
+        <span className="section-toggle-icon">
+          {openSection === "earthquakes" ? "▾" : "▸"}
+        </span>
+      </button>
+
+      {openSection === "earthquakes" && (
+        <div className="panel-section">
           <p className="legend-desc">
             The goal is to show where earthquakes occurred, and also to give a
             sense of how their impact compares.
           </p>
-        </div>
-        <button
-          className="settings-btn"
-          title="Bounding box settings"
-          onClick={() => setSettingsOpen((o) => !o)}
-        >
-          ⚙
-        </button>
-      </div>
 
-      <div className="panel-section">
-        {settingsOpen && (
-          <>
-            <div className="settings-grid">
-              <span className="settings-label">Max lat</span>
+          {/* 2×2 bounding box grid */}
+          <div className="bbox-grid">
+            <div />
+            <div className="bbox-cell bbox-cell--top">
               <input
                 type="number"
                 className="settings-input"
                 step="0.1"
+                placeholder="max lat"
                 value={params.maxlatitude}
                 onChange={(e) =>
                   onChange({ ...params, maxlatitude: Number(e.target.value) })
                 }
               />
-              <span className="settings-label">Min lat</span>
+            </div>
+            <div />
+            <div className="bbox-cell bbox-cell--left">
               <input
                 type="number"
                 className="settings-input"
                 step="0.1"
-                value={params.minlatitude}
-                onChange={(e) =>
-                  onChange({ ...params, minlatitude: Number(e.target.value) })
-                }
-              />
-              <span className="settings-label">Min lon</span>
-              <input
-                type="number"
-                className="settings-input"
-                step="0.1"
+                placeholder="min lon"
                 value={params.minlongitude}
                 onChange={(e) =>
                   onChange({ ...params, minlongitude: Number(e.target.value) })
                 }
               />
-              <span className="settings-label">Max lon</span>
+            </div>
+            <div className="bbox-cell bbox-cell--center">
+              <span className="bbox-compass">□</span>
+            </div>
+            <div className="bbox-cell bbox-cell--right">
               <input
                 type="number"
                 className="settings-input"
                 step="0.1"
+                placeholder="max lon"
                 value={params.maxlongitude}
                 onChange={(e) =>
                   onChange({ ...params, maxlongitude: Number(e.target.value) })
                 }
               />
             </div>
-            <div className="panel-divider" />
-          </>
-        )}
+            <div />
+            <div className="bbox-cell bbox-cell--bottom">
+              <input
+                type="number"
+                className="settings-input"
+                step="0.1"
+                placeholder="min lat"
+                value={params.minlatitude}
+                onChange={(e) =>
+                  onChange({ ...params, minlatitude: Number(e.target.value) })
+                }
+              />
+            </div>
+            <div />
+          </div>
 
-        <div className="nav-row">
-          <span className="nav-label">Start Date:</span>
-          <input
-            type="date"
-            className="nav-date"
-            value={params.starttime}
-            max={new Date().toISOString().slice(0, 10)}
-            onChange={(e) => onChange({ ...params, starttime: e.target.value })}
-          />
+          <div className="nav-row">
+            <span className="nav-label">Start Date:</span>
+            <input
+              type="date"
+              className="nav-date"
+              value={params.starttime}
+              max={new Date().toISOString().slice(0, 10)}
+              onChange={(e) =>
+                onChange({ ...params, starttime: e.target.value })
+              }
+            />
+          </div>
+
+          <button className="fetch-btn" onClick={onFetch} disabled={loading}>
+            {loading ? "Loading…" : "Fetch"}
+          </button>
+
+          <div className="nav-status">
+            {loading ? (
+              "Loading…"
+            ) : error ? (
+              <span className="nav-error">Error: {error}</span>
+            ) : (
+              <>
+                <b>{count}</b> earthquakes
+              </>
+            )}
+          </div>
         </div>
+      )}
 
-        <button className="fetch-btn" onClick={onFetch} disabled={loading}>
-          {loading ? "Loading…" : "Fetch"}
-        </button>
-
-        <div className="nav-status">
-          {loading ? (
-            "Loading…"
-          ) : error ? (
-            <span className="nav-error">Error: {error}</span>
-          ) : (
-            <>
-              <b>{count}</b> earthquakes
-            </>
-          )}
-        </div>
-      </div>
-
-      {/**  Collapsable sections */}
-      <button
-        className="legend-collapse-btn"
-        onClick={() => setLegendOpen((o) => !o)}
-        title={legendOpen ? "Hide scale" : "Show scale"}
-      >
-        {/* <span className="legend-collapse-label">Felt-radius scale</span> */}
-        <span className="legend-collapse-label">{legendOpen ? "▲" : "▼"}</span>
+      {/* ── Section 2: IMPACT AREA ── */}
+      <button className="section-toggle" onClick={() => toggle("impact")}>
+        <span className="section-toggle-title">Impact area</span>
+        <span className="section-toggle-icon">
+          {openSection === "impact" ? "▾" : "▸"}
+        </span>
       </button>
 
-      {/* ── Section 2: scale legend ── */}
-      {legendOpen && (
+      {openSection === "impact" && (
         <div className="panel-section">
-          <p className="legend-section-title">IMPACT AND FELT AREA</p>
           <p className="legend-desc">
             Circle size reflects earthquake energy, adjusted for depth. Larger
             magnitudes expand rapidly, while deeper events are softened. Dotted
@@ -288,7 +298,7 @@ export default function NavPanel({
         </div>
       )}
 
-      {/** Footer section */}
+      {/* ── Footer: always visible ── */}
       <div className="panel-divider" />
       <div className="panel-footer">
         <a
