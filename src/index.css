@@ -440,6 +440,7 @@ html, body, #root {
   font-size: var(--fs-body);
   font-family: inherit;
   width: 100%;
+  appearance: none;
   -moz-appearance: textfield;
 }
 .settings-input::-webkit-outer-spin-button,

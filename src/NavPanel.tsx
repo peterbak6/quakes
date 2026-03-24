@@ -155,9 +155,9 @@ export default function NavPanel({
       {openSection === "impact" && (
         <div className="panel-section">
           <p className="legend-desc">
-            Circle size reflects earthquake energy, adjusted for depth. Larger
-            magnitudes expand rapidly, while deeper events are softened. Dotted
-            line indicates the estimated felt radius by people.
+            Circle size reflects earthquake energy, adjusted for depth. Dotted
+            line on hover indicates the estimated felt radius by people. Adjust
+            the settings for the region's typical earthquake characteristics.
           </p>
 
           <div className="param-list">
@@ -170,7 +170,16 @@ export default function NavPanel({
                   "8",
                   "0.5",
                   (v: number) => v,
-                  "what magnitude is considered a “typical” earthquake",
+                  "what mag is considered “typical” in the region",
+                ],
+                [
+                  "rRef",
+                  "Reference size (px)",
+                  "1",
+                  "60",
+                  "1",
+                  (v: number) => v,
+                  "how large a “typical” earthquake appears",
                 ],
                 [
                   "depthRef",
@@ -198,15 +207,6 @@ export default function NavPanel({
                   "0.1",
                   (v: number) => v.toFixed(1),
                   "how much should depth reduce the impact",
-                ],
-                [
-                  "rRef",
-                  "Reference size (px)",
-                  "1",
-                  "60",
-                  "1",
-                  (v: number) => v,
-                  "how large a “typical” earthquake appears on the map",
                 ],
               ] as [
                 keyof RadiusParams,
@@ -309,7 +309,7 @@ export default function NavPanel({
         >
           USGS Earthquake Catalog
         </a>
-        <p className="data-source-link" style={{ opacity: 0.25 }}>
+        <p className="data-source-link" style={{ opacity: 0.75 }}>
           © 2026 Peter Bak ·{" "}
           <a
             href="https://visualanalytics.co.il"
