@@ -2,8 +2,6 @@
  * Configurable parameters for earthquakePixelRadius.
  */
 export interface RadiusParams {
-  rMin: number; // minimum pixel radius
-  rMax: number; // maximum pixel radius
   rRef: number; // radius at (magRef, depthRef)
   magRef: number; // reference magnitude
   depthRef: number; // reference depth (km)
@@ -12,8 +10,6 @@ export interface RadiusParams {
 }
 
 export const DEFAULT_RADIUS_PARAMS: RadiusParams = {
-  rMin: 4,
-  rMax: 60,
   rRef: 12,
   magRef: 4.0,
   depthRef: 10,
@@ -30,14 +26,12 @@ export function earthquakePixelRadius(
   depthKm: number,
   p: RadiusParams = DEFAULT_RADIUS_PARAMS,
 ): number {
-  const depth = Math.max(0, depthKm);
-  const energyFactor = Math.pow(10, 0.75 * (mag - p.magRef));
-  const attenuationFactor = Math.pow(
-    (p.depthRef + p.d0) / (depth + p.d0),
+  const magFactor = Math.pow(10, 0.75 * (mag - p.magRef));
+  const depthFactor = Math.pow(
+    (p.depthRef + p.d0) / (depthKm + p.d0),
     p.gamma / 2,
   );
-  const r = p.rRef * energyFactor * attenuationFactor;
-  return Math.max(p.rMin, Math.min(p.rMax, r));
+  return p.rRef * magFactor * depthFactor;
 }
 
 /**
@@ -81,4 +75,20 @@ export function sigToColor(
   if (idx < 0) idx = 0;
   const [r, g, b] = SIG_COLORS[Math.min(idx, SIG_COLORS.length - 1)];
   return [r, g, b, alpha];
+}
+
+export function intensityLabel(
+  value: number | null | undefined,
+): string | null {
+  if (value == null) return null;
+
+  if (value < 2) return "not felt";
+  if (value < 3) return "weak";
+  if (value < 4) return "light";
+  if (value < 5) return "moderate";
+  if (value < 6) return "strong";
+  if (value < 7) return "very strong";
+  if (value < 8) return "severe";
+  if (value < 9) return "violent";
+  return "extreme";
 }

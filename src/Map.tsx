@@ -5,7 +5,12 @@ import { ScatterplotLayer, PolygonLayer, PathLayer } from "@deck.gl/layers";
 import { PathStyleExtension } from "@deck.gl/extensions";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { Quake } from "./hooks/useEarthquakes";
-import { earthquakePixelRadius, getFeltRadiusKM, sigToColor } from "./util";
+import {
+  earthquakePixelRadius,
+  getFeltRadiusKM,
+  sigToColor,
+  intensityLabel,
+} from "./util";
 import type { RadiusParams } from "./util";
 
 const INITIAL_VIEW = {
@@ -260,16 +265,13 @@ export default function MapView({
         return {
           html: [
             `<b>${q.location}</b>`,
-            `M ${q.magnitude.toFixed(1)} — ${q.time}`,
-            `Felt radius (estimated) ≈ ${feltStr}`,
-            q.data?.felt != null ? `👤 ${q.data.felt} felt reports` : null,
-            q.data?.cdi != null
-              ? `CDI ${q.data.cdi.toFixed(1)} (community intensity)`
-              : null,
-            q.data?.mmi != null
-              ? `MMI ${q.data.mmi.toFixed(1)} (modeled shaking)`
-              : null,
-            q.data?.alert
+            `Magnitude ${q.magnitude.toFixed(1)}`,
+            `Depth ${q.coords[2].toFixed(1)} km`,
+            `${new Date(q.time).toLocaleString()}`,
+            `Est. Impact radius: ${feltStr}`,
+            `Felt by ${q.data?.felt ?? "N/A"} people`,
+            `Shaking: ${q.data?.cdi != null ? intensityLabel(q.data.cdi) : "N/A"}, ${q.data?.mmi != null ? intensityLabel(q.data.mmi) + "(modeled)" : "N/A"}`,
+            q.data.alert
               ? `Alert: <b style="color:${q.data.alert}">${q.data.alert}</b>`
               : null,
           ]

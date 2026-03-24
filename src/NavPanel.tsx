@@ -40,8 +40,8 @@ export default function NavPanel({
         <div className="panel-header-text">
           <p className="panel-title">Earthquakes</p>
           <p className="legend-desc">
-            Registered earthquakes in the selected region and time period are
-            displayed as semi-transparent circles.
+            The goal is to show where earthquakes occurred, and also to give a
+            sense of how their impact compares.
           </p>
         </div>
         <button
@@ -143,9 +143,11 @@ export default function NavPanel({
       {/* ── Section 2: scale legend ── */}
       {legendOpen && (
         <div className="panel-section">
-          <p className="legend-section-title">Estimated felt area</p>
+          <p className="legend-section-title">IMPACT AND FELT AREA</p>
           <p className="legend-desc">
-            Circle radius scales with energy and attenuates with depth.
+            Circle size reflects earthquake energy, adjusted for depth. Larger
+            magnitudes expand rapidly, while deeper events are softened. Dotted
+            line indicates the estimated felt radius by people.
           </p>
 
           <div className="param-list">
@@ -153,30 +155,30 @@ export default function NavPanel({
               [
                 [
                   "magRef",
-                  "mag ref",
+                  "Reference magnitude",
                   "1",
                   "8",
                   "0.5",
                   (v: number) => v,
-                  'where "normal" is on the magnitude scale',
+                  "what magnitude is considered a “typical” earthquake",
                 ],
                 [
                   "depthRef",
-                  "depth ref (km)",
+                  "Reference depth (km)",
                   "0",
                   "100",
                   "1",
                   (v: number) => v,
-                  'where "normal" is on the depth scale',
+                  "baseline depth where no attenuation is applied",
                 ],
                 [
                   "d0",
-                  "d\u2080 (km)",
+                  "Surface softening (km)",
                   "0",
                   "50",
                   "1",
                   (v: number) => v,
-                  "how far that strength travels — surface softening",
+                  "how fast energy fades near the surface",
                 ],
                 [
                   "gamma",
@@ -185,34 +187,16 @@ export default function NavPanel({
                   "4",
                   "0.1",
                   (v: number) => v.toFixed(1),
-                  "how harsh reality is — higher = more depth penalty",
+                  "how much should depth reduce the impact",
                 ],
                 [
                   "rRef",
-                  "r ref (px)",
+                  "Reference size (px)",
                   "1",
                   "60",
                   "1",
                   (v: number) => v,
-                  'how big "normal" looks at the reference point',
-                ],
-                [
-                  "rMin",
-                  "r min (px)",
-                  "1",
-                  "20",
-                  "1",
-                  (v: number) => v,
-                  "UI floor — smallest any circle gets",
-                ],
-                [
-                  "rMax",
-                  "r max (px)",
-                  "10",
-                  "120",
-                  "1",
-                  (v: number) => v,
-                  "UI ceiling — largest any circle gets",
+                  "how large a “typical” earthquake appears on the map",
                 ],
               ] as [
                 keyof RadiusParams,
