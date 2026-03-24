@@ -207,6 +207,26 @@ html, body, #root {
   flex-direction: column;
   gap: 8px;
 }
+
+/* ── Animated accordion ── */
+.section-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s ease;
+  overflow: hidden;
+}
+.section-body--open {
+  grid-template-rows: 1fr;
+}
+.section-body > .panel-section {
+  min-height: 0;
+  overflow: hidden;
+  padding-block: 0;
+  transition: padding-block 0.3s ease;
+}
+.section-body--open > .panel-section {
+  padding-block: 14px;
+}
 .legend-section-title {
   font-size: var(--fs-body);
   font-weight: 600;

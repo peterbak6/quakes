@@ -37,6 +37,7 @@ export default function App() {
         quakes={quakes}
         bbox={bbox}
         radiusParams={radiusParams}
+        loading={loading}
         onBboxChange={(newBbox) =>
           setDraft((d) => ({
             ...d,

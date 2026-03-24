@@ -1,5 +1,6 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import DeckGL from "@deck.gl/react";
+import { WebMercatorViewport, FlyToInterpolator } from "@deck.gl/core";
 import { Map as MapLibre } from "@vis.gl/react-maplibre";
 import { ScatterplotLayer, PolygonLayer, PathLayer } from "@deck.gl/layers";
 import { PathStyleExtension } from "@deck.gl/extensions";
@@ -47,6 +48,7 @@ interface MapProps {
   quakes: Quake[];
   bbox: BBox;
   radiusParams: RadiusParams;
+  loading: boolean;
   onBboxChange: (bbox: BBox) => void;
   onViewStateChange: (zoom: number, lat: number) => void;
 }
@@ -95,12 +97,42 @@ export default function MapView({
   quakes,
   bbox,
   radiusParams,
+  loading,
   onBboxChange,
   onViewStateChange,
 }: MapProps) {
   const dragRef = useRef<DragState | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [hoveredQuake, setHoveredQuake] = useState<Quake | null>(null);
+  const [viewState, setViewState] = useState<object>(INITIAL_VIEW);
+
+  // Fit to bbox via DeckGL-controlled viewState when fetch completes
+  const prevLoading = useRef(loading);
+  useEffect(() => {
+    if (prevLoading.current && !loading) {
+      const vp = new WebMercatorViewport({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+      const { longitude, latitude, zoom } = vp.fitBounds(
+        [
+          [bbox.minLon, bbox.minLat],
+          [bbox.maxLon, bbox.maxLat],
+        ],
+        { padding: 60 },
+      );
+      setViewState({
+        longitude,
+        latitude,
+        zoom,
+        pitch: 0,
+        bearing: 0,
+        transitionInterpolator: new FlyToInterpolator({ speed: 1.5 }),
+        transitionDuration: "auto",
+      });
+    }
+    prevLoading.current = loading;
+  }, [loading, bbox]);
 
   const midLon = (bbox.minLon + bbox.maxLon) / 2;
   const midLat = (bbox.minLat + bbox.maxLat) / 2;
@@ -243,14 +275,16 @@ export default function MapView({
 
   return (
     <DeckGL
-      initialViewState={INITIAL_VIEW}
+      viewState={viewState}
+      onViewStateChange={({ viewState: vs }) => {
+        setViewState(vs);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { zoom, latitude } = vs as any;
+        onViewStateChange(zoom, latitude);
+      }}
       controller={isDragging ? { dragPan: false } : true}
       layers={layers}
       style={{ position: "absolute", inset: "0" }}
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      onViewStateChange={({ viewState }: any) =>
-        onViewStateChange(viewState.zoom, viewState.latitude)
-      }
       getCursor={({ isHovering }) =>
         isDragging ? "grabbing" : isHovering ? "grab" : "default"
       }

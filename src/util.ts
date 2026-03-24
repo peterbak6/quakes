@@ -10,8 +10,8 @@ export interface RadiusParams {
 }
 
 export const DEFAULT_RADIUS_PARAMS: RadiusParams = {
-  rRef: 12,
-  magRef: 4.0,
+  rRef: 20,
+  magRef: 6.0,
   depthRef: 10,
   d0: 5,
   gamma: 1.6,

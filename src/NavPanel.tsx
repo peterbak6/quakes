@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { QuakeParams } from "./hooks/useEarthquakes";
 import { SIG_LABELS, SIG_COLORS } from "./util";
 import type { RadiusParams } from "./util";
@@ -33,6 +33,15 @@ export default function NavPanel({
   const toggle = (s: "earthquakes" | "color" | "impact") =>
     setOpenSection((cur) => (cur === s ? null : s));
 
+  // Auto-close earthquakes section when a fetch completes
+  const prevLoading = useRef(loading);
+  useEffect(() => {
+    if (prevLoading.current && !loading && !error) {
+      setOpenSection(null);
+    }
+    prevLoading.current = loading;
+  }, [loading, error]);
+
   return (
     <div className="slider-panel">
       {/* ── Section 1: EARTHQUAKES ── */}
@@ -42,8 +51,9 @@ export default function NavPanel({
           {openSection === "earthquakes" ? "▾" : "▸"}
         </span>
       </button>
-
-      {openSection === "earthquakes" && (
+      <div
+        className={`section-body${openSection === "earthquakes" ? " section-body--open" : ""}`}
+      >
         <div className="panel-section">
           <p className="legend-desc">
             The goal is to show where earthquakes occurred, and also to give a
@@ -122,8 +132,14 @@ export default function NavPanel({
             />
           </div>
 
-          <button className="fetch-btn" onClick={onFetch} disabled={loading}>
-            {loading ? "Loading…" : "Fetch"}
+          <button
+            className="fetch-btn"
+            onClick={() => {
+              onFetch();
+            }}
+            disabled={loading}
+          >
+            {loading ? "Loading…" : "Load"}
           </button>
 
           <div className="nav-status">
@@ -138,16 +154,18 @@ export default function NavPanel({
             )}
           </div>
         </div>
-      )}
+      </div>
 
-      {/* -- Section Color Legend (optional) -- */}
+      {/* ── Section: SIGNIFICANCE ── */}
       <button className="section-toggle" onClick={() => toggle("color")}>
         <span className="section-toggle-title">Significance</span>
         <span className="section-toggle-icon">
           {openSection === "color" ? "▾" : "▸"}
         </span>
       </button>
-      {openSection === "color" && (
+      <div
+        className={`section-body${openSection === "color" ? " section-body--open" : ""}`}
+      >
         <div className="panel-section">
           <p className="legend-desc">
             Earthquakes are coloured by their USGS significance score, which is
@@ -169,7 +187,7 @@ export default function NavPanel({
             ))}
           </div>
         </div>
-      )}
+      </div>
 
       {/* ── Section 2: IMPACT AREA ── */}
       <button className="section-toggle" onClick={() => toggle("impact")}>
@@ -178,8 +196,9 @@ export default function NavPanel({
           {openSection === "impact" ? "▾" : "▸"}
         </span>
       </button>
-
-      {openSection === "impact" && (
+      <div
+        className={`section-body${openSection === "impact" ? " section-body--open" : ""}`}
+      >
         <div className="panel-section">
           <p className="legend-desc">
             Circle size reflects earthquake energy, adjusted for depth. Dotted
@@ -195,7 +214,7 @@ export default function NavPanel({
                   "Reference magnitude",
                   "1",
                   "8",
-                  "0.5",
+                  "0.1",
                   (v: number) => v,
                   "what mag is considered “typical” in the region",
                 ],
@@ -266,7 +285,7 @@ export default function NavPanel({
             ))}
           </div>
         </div>
-      )}
+      </div>
 
       {/* ── Footer: always visible ── */}
       <div className="panel-divider" />
