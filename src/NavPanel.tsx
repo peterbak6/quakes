@@ -1,11 +1,7 @@
 import { useState } from "react";
 import type { QuakeParams } from "./hooks/useEarthquakes";
-import { earthquakePixelRadius } from "./util";
+import { SIG_LABELS, SIG_COLORS } from "./util";
 import type { RadiusParams } from "./util";
-
-const SCALE_MAGS = [3, 4, 5, 6, 7, 8, 9];
-const BAR_W = 260;
-const X0 = 0;
 
 interface NavPanelProps {
   params: QuakeParams;
@@ -31,10 +27,10 @@ export default function NavPanel({
   const set = (key: keyof RadiusParams, val: number) =>
     onRadiusParamsChange({ ...radiusParams, [key]: val });
   const [openSection, setOpenSection] = useState<
-    "earthquakes" | "impact" | null
+    "earthquakes" | "color" | "impact" | null
   >("earthquakes");
 
-  const toggle = (s: "earthquakes" | "impact") =>
+  const toggle = (s: "earthquakes" | "color" | "impact") =>
     setOpenSection((cur) => (cur === s ? null : s));
 
   return (
@@ -144,6 +140,37 @@ export default function NavPanel({
         </div>
       )}
 
+      {/* -- Section Color Legend (optional) -- */}
+      <button className="section-toggle" onClick={() => toggle("color")}>
+        <span className="section-toggle-title">Significance</span>
+        <span className="section-toggle-icon">
+          {openSection === "color" ? "▾" : "▸"}
+        </span>
+      </button>
+      {openSection === "color" && (
+        <div className="panel-section">
+          <p className="legend-desc">
+            Earthquakes are coloured by their USGS significance score, which is
+            a composite measure of magnitude, felt reports, and other factors.
+            Higher significance often indicates more impactful earthquakes, even
+            if their magnitude isn't the highest.
+          </p>
+          <div className="sig-legend">
+            {SIG_LABELS.map((label, i) => (
+              <div className="sig-legend-row" key={i}>
+                <span
+                  className="sig-legend-swatch"
+                  style={{
+                    backgroundColor: `rgba(${SIG_COLORS[i].join(",")}, 200)`,
+                  }}
+                />
+                <span className="sig-legend-label">{label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* ── Section 2: IMPACT AREA ── */}
       <button className="section-toggle" onClick={() => toggle("impact")}>
         <span className="section-toggle-title">Impact area</span>
@@ -238,63 +265,6 @@ export default function NavPanel({
               </div>
             ))}
           </div>
-
-          {/* Scale-line legend: ticks at reference depth */}
-          {(() => {
-            const ticks = SCALE_MAGS.map((m) => ({
-              m,
-              x:
-                X0 +
-                earthquakePixelRadius(m, radiusParams.depthRef, radiusParams),
-            })).filter((t) => t.x <= X0 + BAR_W);
-            return (
-              <svg
-                className="size-legend-svg"
-                width="100%"
-                height="26"
-                aria-label="Radius scale"
-              >
-                <line
-                  x1={X0}
-                  y1={8}
-                  x2={X0 + BAR_W}
-                  y2={8}
-                  stroke="#bbb"
-                  strokeWidth="1"
-                />
-                <line
-                  x1={X0}
-                  y1={4}
-                  x2={X0}
-                  y2={12}
-                  stroke="#bbb"
-                  strokeWidth="1"
-                />
-                {ticks.map(({ m, x }) => (
-                  <g key={m}>
-                    <line
-                      x1={x}
-                      y1={4}
-                      x2={x}
-                      y2={12}
-                      stroke="#999"
-                      strokeWidth="1"
-                    />
-                    <text
-                      x={x}
-                      y={22}
-                      textAnchor="middle"
-                      fontSize="8"
-                      fill="#888"
-                      fontFamily="inherit"
-                    >
-                      {m}
-                    </text>
-                  </g>
-                ))}
-              </svg>
-            );
-          })()}
         </div>
       )}
 

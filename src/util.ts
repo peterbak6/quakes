@@ -57,13 +57,25 @@ export function getFeltRadiusKM(mag: number): number {
  * Ranges: 0–100 very minor, 100–300 moderate, 300–700 strong,
  *         700–1500 major, 1500+ very major/damaging.
  */
-const SIG_BREAKS = [0, 100, 300, 700, 1500];
-const SIG_COLORS: [number, number, number][] = [
+export const SIG_BREAKS = [0, 100, 300, 700, 1500];
+export const SIG_LABELS = [
+  "Low (0-100)",
+  "Moderate (100-300)",
+  "High (300-700)",
+  "Major (700-1500)",
+  "Extreme (1500+)",
+];
+export const SIG_COLORS: [number, number, number][] = [
   [255, 255, 178], // #ffffb2
   [254, 204, 92], // #fecc5c
   [253, 141, 60], // #fd8d3c
   [240, 59, 32], // #f03b20
   [189, 0, 38], // #bd0026
+  // [49, 163, 84], // #31a354
+  // [255, 237, 160], // #ffeda0
+  // [254, 178, 76], // #feb24c
+  // [240, 59, 32], // #f03b20
+  // [99, 99, 99], // #636363
 ];
 
 export function sigToColor(

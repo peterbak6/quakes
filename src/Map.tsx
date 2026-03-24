@@ -269,8 +269,9 @@ export default function MapView({
             `Depth ${q.coords[2].toFixed(1)} km`,
             `${new Date(q.time).toLocaleString()}`,
             `Est. Impact radius: ${feltStr}`,
+            `Significance score: ${q.data?.sig ?? "N/A"}`,
             `Felt by ${q.data?.felt ?? "N/A"} people`,
-            `Shaking: ${q.data?.cdi != null ? intensityLabel(q.data.cdi) : "N/A"}, ${q.data?.mmi != null ? intensityLabel(q.data.mmi) + "(modeled)" : "N/A"}`,
+            `Shaking: ${intensityLabel(q.data.cdi) ?? "N/A"}, ${intensityLabel(q.data.mmi) ?? "N/A"} (modeled)`,
             q.data.alert
               ? `Alert: <b style="color:${q.data.alert}">${q.data.alert}</b>`
               : null,

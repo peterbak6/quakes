@@ -1,6 +1,7 @@
 import { useState } from "react";
 import MapView from "./Map";
 import NavPanel from "./NavPanel";
+import ScaleLegend from "./ScaleLegend";
 import { useEarthquakes } from "./hooks/useEarthquakes";
 import type { QuakeParams } from "./hooks/useEarthquakes";
 import { DEFAULT_RADIUS_PARAMS } from "./util";
@@ -47,6 +48,7 @@ export default function App() {
         }
         onViewStateChange={() => {}}
       />
+      <ScaleLegend radiusParams={radiusParams} />
       <NavPanel
         params={draft}
         onChange={setDraft}

@@ -448,26 +448,26 @@ html, body, #root {
   -webkit-appearance: none;
 }
 
-/* ── Color legend ── */
-.legend {
+/* ── Significance color legend ── */
+.sig-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.sig-legend-row {
   display: flex;
   align-items: center;
-  gap: 2px;
-  margin-top: 2px;
+  gap: 8px;
 }
-.legend-cell {
-  flex: 1;
-  height: 8px;
-  border-radius: 2px;
-  opacity: 0.9;
-}
-.legend-label {
-  font-size: var(--fs-coords);
-  font-weight: 400;
-  opacity: 0.45;
-  width: 22px;
-  text-align: center;
+.sig-legend-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
   flex-shrink: 0;
+}
+.sig-legend-label {
+  font-size: var(--fs-body);
+  opacity: 0.65;
 }
 
 /* ── Tooltip ── */
