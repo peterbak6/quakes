@@ -1,4 +1,47 @@
 /**
+ * Utility functions and types for earthquake data and visualization.
+ * Shared between App, Map, NavPanel, and useEarthquakes.
+ */
+export interface QuakeParams {
+  starttime: string;
+  minmagnitude: number;
+  minlatitude: number;
+  maxlatitude: number;
+  minlongitude: number;
+  maxlongitude: number;
+}
+
+export interface Quake {
+  magnitude: number;
+  location: string;
+  time: string;
+  url: string;
+  coords: [number, number, number];
+  data: any; // for any additional properties from the API
+}
+
+export const DEFAULT_PARAMS: QuakeParams = {
+  starttime: "2016-01-01",
+  minmagnitude: 3.5,
+  minlatitude: 28.0,
+  maxlatitude: 36.5,
+  minlongitude: 32.0,
+  maxlongitude: 38.0,
+};
+
+export function loadStoredParams(): QuakeParams {
+  const stored = localStorage.getItem("quakeDraftParams");
+  if (stored) {
+    try {
+      return JSON.parse(stored) as QuakeParams;
+    } catch (e) {
+      console.error("Failed to parse draft params from localStorage", e);
+    }
+  }
+  return DEFAULT_PARAMS;
+}
+
+/**
  * Configurable parameters for earthquakePixelRadius.
  */
 export interface RadiusParams {
@@ -14,7 +57,7 @@ export const DEFAULT_RADIUS_PARAMS: RadiusParams = {
   magRef: 6.0,
   depthRef: 10,
   d0: 5,
-  gamma: 1.6,
+  gamma: 0.6,
 };
 
 /**

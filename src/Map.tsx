@@ -5,14 +5,13 @@ import { Map as MapLibre } from "@vis.gl/react-maplibre";
 import { ScatterplotLayer, PolygonLayer, PathLayer } from "@deck.gl/layers";
 import { PathStyleExtension } from "@deck.gl/extensions";
 import "maplibre-gl/dist/maplibre-gl.css";
-import type { Quake } from "./hooks/useEarthquakes";
+import type { Quake, RadiusParams } from "./util";
 import {
   earthquakePixelRadius,
   getFeltRadiusKM,
   sigToColor,
   intensityLabel,
 } from "./util";
-import type { RadiusParams } from "./util";
 
 const INITIAL_VIEW = {
   longitude: 35.0,
@@ -294,7 +293,7 @@ export default function MapView({
         const feltKm = getFeltRadiusKM(q.magnitude);
         const feltStr =
           feltKm >= 100
-            ? `${Math.round(feltKm)} km`
+            ? `${Math.round(feltKm)} km (dotted circle)`
             : `${feltKm.toFixed(1)} km`;
         return {
           html: [
@@ -303,7 +302,7 @@ export default function MapView({
             `Depth ${q.coords[2].toFixed(1)} km`,
             `${new Date(q.time).toLocaleString()}`,
             `Est. Impact radius: ${feltStr}`,
-            `Significance score: ${q.data?.sig ?? "N/A"}`,
+            `Significance score: ${q.data?.sig ? q.data.sig + " (composite)" : "N/A"}`,
             `Felt by ${q.data?.felt ?? "N/A"} people`,
             `Shaking: ${intensityLabel(q.data.cdi) ?? "N/A"}, ${intensityLabel(q.data.mmi) ?? "N/A"} (modeled)`,
             q.data.alert

@@ -1,22 +1,5 @@
 import { useState, useEffect } from "react";
-
-export interface QuakeParams {
-  starttime: string;
-  minmagnitude: number;
-  minlatitude: number;
-  maxlatitude: number;
-  minlongitude: number;
-  maxlongitude: number;
-}
-
-export interface Quake {
-  magnitude: number;
-  location: string;
-  time: string;
-  url: string;
-  coords: [number, number, number];
-  data: any; // for any additional properties from the API
-}
+import type { Quake, QuakeParams } from "../util";
 
 const USGS_URL = "https://earthquake.usgs.gov/fdsnws/event/1/query";
 

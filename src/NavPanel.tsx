@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { QuakeParams } from "./hooks/useEarthquakes";
+import type { QuakeParams } from "./util";
 import { SIG_LABELS, SIG_COLORS } from "./util";
 import type { RadiusParams } from "./util";
 
@@ -168,10 +168,9 @@ export default function NavPanel({
       >
         <div className="panel-section">
           <p className="legend-desc">
-            Earthquakes are coloured by their USGS significance score, which is
-            a composite measure of magnitude, felt reports, and other factors.
-            Higher significance often indicates more impactful earthquakes, even
-            if their magnitude isn't the highest.
+            Earthquakes are coloured by their USGS significance score, which
+            includes not just magnitude, but also depth, felt reports, and other
+            factors.
           </p>
           <div className="sig-legend">
             {SIG_LABELS.map((label, i) => (
@@ -201,9 +200,9 @@ export default function NavPanel({
       >
         <div className="panel-section">
           <p className="legend-desc">
-            Circle size reflects earthquake energy, adjusted for depth. Dotted
-            line on hover indicates the estimated felt radius by people. Adjust
-            the settings for the region's typical earthquake characteristics.
+            Circle size reflects earthquake energy, magnitude adjusted for
+            depth. Adjust the settings for the region's typical earthquake
+            characteristics.
           </p>
 
           <div className="param-list">

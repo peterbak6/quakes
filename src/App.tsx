@@ -1,45 +1,40 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import MapView from "./Map";
 import NavPanel from "./NavPanel";
 import ScaleLegend from "./ScaleLegend";
 import { useEarthquakes } from "./hooks/useEarthquakes";
-import type { QuakeParams } from "./hooks/useEarthquakes";
-import { DEFAULT_RADIUS_PARAMS } from "./util";
-import type { RadiusParams } from "./util";
-
-const DEFAULT_PARAMS: QuakeParams = {
-  starttime: "2016-01-01",
-  minmagnitude: 3.5,
-  minlatitude: 28.0,
-  maxlatitude: 36.5,
-  minlongitude: 32.0,
-  maxlongitude: 38.0,
-};
+import type { QuakeParams, RadiusParams } from "./util";
+import { DEFAULT_RADIUS_PARAMS, loadStoredParams } from "./util";
 
 export default function App() {
-  const [draft, setDraft] = useState<QuakeParams>(DEFAULT_PARAMS);
-  const [committed, setCommitted] = useState<QuakeParams>(DEFAULT_PARAMS);
+  const [pendingParams, setPendingParams] =
+    useState<QuakeParams>(loadStoredParams);
+  const [activeParams, setActiveParams] =
+    useState<QuakeParams>(loadStoredParams);
   const [radiusParams, setRadiusParams] = useState<RadiusParams>(
     DEFAULT_RADIUS_PARAMS,
   );
-  const { quakes, loading, error, count } = useEarthquakes(committed);
 
-  const bbox = {
-    minLat: draft.minlatitude,
-    maxLat: draft.maxlatitude,
-    minLon: draft.minlongitude,
-    maxLon: draft.maxlongitude,
-  };
+  useEffect(() => {
+    localStorage.setItem("quakeDraftParams", JSON.stringify(pendingParams));
+  }, [pendingParams]);
+
+  const { quakes, loading, error, count } = useEarthquakes(activeParams);
 
   return (
     <div className="app">
       <MapView
         quakes={quakes}
-        bbox={bbox}
+        bbox={{
+          minLat: pendingParams.minlatitude,
+          maxLat: pendingParams.maxlatitude,
+          minLon: pendingParams.minlongitude,
+          maxLon: pendingParams.maxlongitude,
+        }}
         radiusParams={radiusParams}
         loading={loading}
         onBboxChange={(newBbox) =>
-          setDraft((d) => ({
+          setPendingParams((d) => ({
             ...d,
             minlatitude: newBbox.minLat,
             maxlatitude: newBbox.maxLat,
@@ -51,9 +46,9 @@ export default function App() {
       />
       <ScaleLegend radiusParams={radiusParams} />
       <NavPanel
-        params={draft}
-        onChange={setDraft}
-        onFetch={() => setCommitted(draft)}
+        params={pendingParams}
+        onChange={setPendingParams}
+        onFetch={() => setActiveParams(pendingParams)}
         loading={loading}
         count={count}
         error={error}

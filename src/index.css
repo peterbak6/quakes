@@ -174,7 +174,7 @@ html, body, #root {
   border: none;
   border-top: 1px solid rgba(0, 0, 0, 0.08);
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-  padding: 9px 16px;
+  padding: 4px 16px;
   cursor: pointer;
   font-family: inherit;
   transition: background 0.12s;
@@ -202,7 +202,7 @@ html, body, #root {
   margin: 0;
 }
 .panel-section {
-  padding: 14px 16px;
+  padding: 2px 4px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -225,7 +225,7 @@ html, body, #root {
   transition: padding-block 0.3s ease;
 }
 .section-body--open > .panel-section {
-  padding-block: 14px;
+  padding-block: 4px;
 }
 .legend-section-title {
   font-size: var(--fs-body);
@@ -275,10 +275,10 @@ html, body, #root {
 
 /* ── Data source footer ── */
 .panel-footer {
-  padding: 10px 16px 12px;
+  padding: 1px 10px;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 1px;
 }
 .data-source-link {
   font-size: var(--fs-overlay);
