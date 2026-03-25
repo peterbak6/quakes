@@ -96,6 +96,30 @@ export function getFeltRadiusKM(mag: number): number {
 }
 
 /**
+ * Compute coordinates for a circle ring around a point, approximating a circle on the Earth's surface.
+ * @param lon
+ * @param lat
+ * @param radiusM
+ * @param nSeg
+ * @returns
+ */
+export function circleRingCoords(
+  lon: number,
+  lat: number,
+  radiusM: number,
+  nSeg = 80,
+): [number, number][] {
+  const latDeg = radiusM / 111320;
+  const lonDeg = radiusM / (111320 * Math.cos((lat * Math.PI) / 180));
+  const coords: [number, number][] = [];
+  for (let i = 0; i <= nSeg; i++) {
+    const a = (2 * Math.PI * i) / nSeg;
+    coords.push([lon + Math.cos(a) * lonDeg, lat + Math.sin(a) * latDeg]);
+  }
+  return coords;
+}
+
+/**
  * Maps USGS significance score (sig) to an RGBA fill colour.
  * Ranges: 0–100 very minor, 100–300 moderate, 300–700 strong,
  *         700–1500 major, 1500+ very major/damaging.

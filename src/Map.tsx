@@ -11,6 +11,7 @@ import {
   getFeltRadiusKM,
   sigToColor,
   intensityLabel,
+  circleRingCoords,
 } from "./util";
 
 const INITIAL_VIEW = {
@@ -50,23 +51,6 @@ interface MapProps {
   loading: boolean;
   onBboxChange: (bbox: BBox) => void;
   onViewStateChange: (zoom: number, lat: number) => void;
-}
-
-// Approximate a geographic circle as a closed path (lon/lat coords)
-function circleRingCoords(
-  lon: number,
-  lat: number,
-  radiusM: number,
-  nSeg = 80,
-): [number, number][] {
-  const latDeg = radiusM / 111320;
-  const lonDeg = radiusM / (111320 * Math.cos((lat * Math.PI) / 180));
-  const coords: [number, number][] = [];
-  for (let i = 0; i <= nSeg; i++) {
-    const a = (2 * Math.PI * i) / nSeg;
-    coords.push([lon + Math.cos(a) * lonDeg, lat + Math.sin(a) * latDeg]);
-  }
-  return coords;
 }
 
 function applyDrag(drag: DragState, coord: [number, number]): BBox {
